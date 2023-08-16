@@ -1,0 +1,13 @@
+mc.py
+aiogram
+beautifulsoup4
+requests
+lxml
+loguru
+selenium
+python-mpv
+py-cpuinfo
+psutil
+# tts
+langdetect
+gtts
