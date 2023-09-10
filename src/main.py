@@ -142,7 +142,7 @@ else:
 
 logger.info('One moment...')
 start_menu = types.InlineKeyboardMarkup()
-start_menu.row(types.InlineKeyboardButton(text='Веб-сайт voZer', url='https://vozer-project.codeberg.page'))
+start_menu.row(types.InlineKeyboardButton(text='Исходный код reZov', url='https://github.com/Nediorg/reZov'))
 start_menu.row(types.InlineKeyboardButton(text=contact_with_admin_text, callback_data='send_info'))
 start_menu.row(types.InlineKeyboardButton(text=prviacy_policy_title, callback_data='privacy_policy'))
 start_menu.row(types.InlineKeyboardButton(text=func_button, callback_data='com'))
