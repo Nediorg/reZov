@@ -11,7 +11,6 @@ news_channel = '<your news channel @username here>'
 admin_username = '<your @username here>'
 admin_id = <your telegram id here>
 admins = [<your telegram id here>]
-logs_channel = '<your logs channel @username here>'
 logs_channel_id = <your logs channel telegram id here>
 activate_logs = True
 
