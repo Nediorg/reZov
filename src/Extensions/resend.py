@@ -1,10 +1,12 @@
 from aiogram.utils.exceptions import ChatNotFound, CantInitiateConversation, BotBlocked
 
 # SEND
-send_txt = "<b>Сообщение отправлено администратору reZov.</b>\nПомните: за отправку неподобающих сообщений вы можете <b>получить блокировку.</b>"
+warning = "Помните: за отправку неподобающих сообщений вы можете <b>получить блокировку.</b>"
+send_txt = f"<b>Сообщение отправлено администратору reZov.</b>\n{warning}"
 sendpm_txt = "Пользователь"
 send_title = 'Отправлено админ-ам:\n'
-send_hlp = '<b>Отправляет ваше сообщение админ-ам reZov.</b>\nПомните: за отправку неподобающих сообщений вы можете <b>получить блокировку.</b>'
+send_hlp = f'<b>Отправляет ваше сообщение админ-ам reZov.</b>\n{warning}'
+dm_error = 'Эту команду можно выполнить только из ЛС.'
 # RESEND
 recieved_txt = "<b>❗Сообщение от администраторов reZov:</b>"
 logadm_txt = 'Отправлено админом'
@@ -18,15 +20,21 @@ cic_txt = '⛔ <b>Не удалось отправить сообщение.</b>
 blockbot_txt = '⛔ <b>Не удалось отправить сообщение.</b> Пользователь заблокировал бота.'
 @dp.message_handler(commands='send')  
 async def send_admin(message:types.Message):
-    if not len(message.text[6:])==0:
-        your_id = message.from_id
-        your_name = message.from_user.username
-        await message.reply(send_txt, parse_mode='HTML')
-        await bot.send_message(config.admin_id, f'<b>{sendpm_txt} <a href="tg://user?id={your_id}">@{your_name}</a> <a href="tg://user?id={your_id}">(ссылка)</a>:</b>\n{message.text[6:]}\n\n<code>/resend {your_id}</code>', parse_mode='HTML')
-        logger.info(f'To admins from: {message.from_user.username} (ID: {message.from_id}): {message.text[6:]}')
-        await bot.send_message(config.logs_channel_id, f'{send_title}\n<b>{sendpm_txt} <a href="tg://user?id={your_id}">@{your_name}</a> <a href="tg://user?id={your_id}">(ссылка)</a>:</b>\n\n---\n\n{message.text[6:]}', parse_mode='HTML')
-    else:
-        await message.reply(send_hlp, parse_mode='HTML')         
+	if message.chat.id != message.from_user.id:
+		link = await get_start_link("")
+		dm_link = types.InlineKeyboardMarkup()
+		dm_link.row(types.InlineKeyboardButton(text="Перейти", url=link))
+		await message.reply(dm_error, parse_mode='HTML', reply_markup=dm_link)
+	else:
+		if not len(message.text[6:])==0:
+			your_id = message.from_id
+			your_name = message.from_user.username
+			await message.reply(send_txt, parse_mode='HTML')
+			await bot.send_message(config.admin_id, f'<b>{sendpm_txt} <a href="tg://user?id={your_id}">@{your_name}</a> <a href="tg://user?id={your_id}">(ссылка)</a>:</b>\n{message.text[6:]}\n\n<code>/resend {your_id}</code>', parse_mode='HTML')
+			logger.info(f'To admins from: {message.from_user.username} (ID: {message.from_id}): {message.text[6:]}')
+			await bot.send_message(config.logs_channel_id, f'{send_title}\n<b>{sendpm_txt} <a href="tg://user?id={your_id}">@{your_name}</a> <a href="tg://user?id={your_id}">(ссылка)</a>:</b>\n\n---\n\n{message.text[6:]}', parse_mode='HTML')
+		else:
+			await message.reply(send_hlp, parse_mode='HTML')         
 
 @dp.message_handler(commands='resend')  
 async def resend_admin(message:types.Message):
