@@ -1,3 +1,6 @@
+from aiogram.utils.deep_linking import get_start_link
+from aiogram.utils.callback_data import CallbackData
+from typing import Optional, List
 
 # Locals
 bot_base_warn = "\n\n<b>ВНИМАНИЕ:</b> Мы не несем ответственности за информацию, хранящуюся в базе бота, так как она заполняется пользователями."
@@ -7,7 +10,7 @@ bot_is_silent = 'Теперь, для этого чата, бот <b>неакт�
 bot_is_active = 'Теперь, для этого чата, бот <b>активен</b>.'
 logs_disabled = 'Теперь, для этого чата, логи <b>отключены</b>. Но имейте в виду, что информация о сообщениях все равно собирается внутри бота и отключить ее <b>нельзя.</b> '
 logs_enabled = 'Теперь, для этого чата, логи <b>включены</b>.'
-reset_warning = '<b>!!! ВЫ НЕ МОЖЕТЕ ОТМЕНИТЬ ЭТО ДЕЙСТВИЕ !!!</b>\n\nВы хотите продолжить??'
+reset_warning = 'Внимание: <b>вы не можете обратить это действие!</b>\nУдалить базу?'
 reset_msg = 'Сброс...'
 base_backup = 'Резервная копия базы перед сбросом:'
 reset_ok = 'Сброс завершён.'
@@ -16,6 +19,7 @@ already_disabled = 'Уже отключено.'
 already_enabled = 'Уже включено.'
 dplist_caption = 'Файл с отклонёнными фразами:'
 no_disabled_phrases = 'Нет отклонённых фраз.'
+goto_pm = 'Чтобы продолжить, необходимо пройти в ЛС:'
 
 reset_menu = types.InlineKeyboardMarkup()
 reset_menu.row(types.InlineKeyboardButton(text=no, callback_data='cancel_delete_base'))
@@ -24,16 +28,16 @@ reset_menu.row(types.InlineKeyboardButton(text=no, callback_data='cancel_delete_
 reset_menu.row(types.InlineKeyboardButton(text=no, callback_data='cancel_delete_base'))
 reset_menu.row(types.InlineKeyboardButton(text=yes, callback_data='delete_base'))
 
-@dp.callback_query_handler(text='delete_base')
-async def del_base(call: types.CallbackQuery):
+@dp.callback_query_handler(lambda c: c.data =='delete_base')
+async def del_base(call: types.CallbackQuery, **kwargs):
     await call.message.reply(reset_msg)
-    if os.path.exists(f'Bases/{call.message.chat.id}.txt'):
-        base_file = open(f'Bases/{call.message.chat.id}.txt', 'r', encoding='utf8')
+    if os.path.exists(f'Bases/{chat_id}.txt'):
+        base_file = open(f'Bases/{chat_id}.txt', 'r', encoding='utf8')
         await call.message.reply_document(base_file, caption=base_backup)
         base_file.close()
-        os.remove(f'Bases/{call.message.chat.id}.txt')
+        os.remove(f'Bases/{chat_id}.txt')
     else:
-        bf = open(f'Bases/{call.message.chat.id}.txt', 'w', encoding='utf8')
+        bf = open(f'Bases/{chat_id}.txt', 'w', encoding='utf8')
         bf.write('Hello, world!')
         bf.close()
     await call.message.reply(reset_ok)
@@ -62,27 +66,6 @@ async def toggle_bot_for_chat(message: types.Message):
     else:
         await message.reply(change_info_error, parse_mode='HTML')
 
-@dp.message_handler(commands='basemode')
-async def toggle_global_and_local_base(message: types.Message):
-    if await check_change_info_permission(message):
-        if str(message.chat.id) in bot_base_chats_list:
-            if not os.path.exists('Bases/' + str(message.chat.id) + '.txt'):
-                bf = open('Bases/' + str(message.chat.id) + '.txt', 'w', encoding='utf8')
-                bf.write('Hello World!·')
-            bot_base_chats_list.remove(str(message.chat.id))
-            bbc_list = open(f'{config.lists_dir}botbasechats.txt', 'w', encoding='utf8')
-            for ids in bot_base_chats_list:
-                bbc_list.write('%s\n' %ids)
-            await message.reply(use_chat_base, parse_mode='HTML')
-        else:
-            bot_base_chats_list.append(str(message.chat.id))
-            bbc_list = open(f'{config.lists_dir}botbasechats.txt', 'w', encoding='utf8')
-            for ids in bot_base_chats_list:
-                bbc_list.write('%s\n' %ids)
-            await message.reply(use_bot_base, parse_mode='HTML')
-    else:
-        await message.reply(change_info_error, parse_mode='HTML')
-
 @dp.message_handler(commands='logsmode')
 async def toggle_logs(message: types.Message):
     if await check_change_info_permission(message):
@@ -103,10 +86,26 @@ async def toggle_logs(message: types.Message):
 
 @dp.message_handler(commands='reset')
 async def reset_base(message: types.Message):
-    if await check_change_info_permission(message) == True:
-        await message.reply(reset_warning, parse_mode='HTML', reply_markup=reset_menu)
+    if message.chat.id != message.from_user.id:
+        link = await get_start_link(f"reset_{message.chat.id}", encode=True)
+        check_permission = types.InlineKeyboardMarkup()
+        check_permission.row(types.InlineKeyboardButton(text="Перейти", url=link))
+        check_permission.row(types.InlineKeyboardButton(text="Отмена", callback_data='cancel_delete_base'))
+        await message.reply(goto_pm, parse_mode='HTML', reply_markup=check_permission)
     else:
-        await message.reply(change_info_error, parse_mode='HTML')
+        global chat_id
+        chat_id = message.chat.id
+        await message.reply(reset_warning, parse_mode='HTML', reply_markup=reset_menu)
+
+async def reset_link(message: types.Message, parameters: Optional[List[str]] = None):
+        global chat_id
+        chat_id = parameters[1]
+        member = await bot.get_chat_member(int(parameters[1]), message.from_user.id)
+        if member.status == types.ChatMemberStatus.CREATOR:
+            await message.reply(reset_warning, parse_mode='HTML', reply_markup=reset_menu)
+        else:
+            await message.reply(change_info_error, parse_mode='HTML')
+                
 
 @dp.message_handler(commands='disable')
 async def disable_reply_to_phrase(message: types.Message):
