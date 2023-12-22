@@ -19,7 +19,7 @@ already_disabled = 'Уже отключено.'
 already_enabled = 'Уже включено.'
 dplist_caption = 'Файл с отклонёнными фразами:'
 no_disabled_phrases = 'Нет отклонённых фраз.'
-goto_pm = 'Чтобы продолжить, необходимо пройти в ЛС:'
+goto_dm = 'Чтобы продолжить, необходимо пройти в ЛС:'
 
 reset_menu = types.InlineKeyboardMarkup()
 reset_menu.row(types.InlineKeyboardButton(text=no, callback_data='cancel_delete_base'))
@@ -91,7 +91,7 @@ async def reset_base(message: types.Message):
         check_permission = types.InlineKeyboardMarkup()
         check_permission.row(types.InlineKeyboardButton(text="Перейти", url=link))
         check_permission.row(types.InlineKeyboardButton(text="Отмена", callback_data='cancel_delete_base'))
-        await message.reply(goto_pm, parse_mode='HTML', reply_markup=check_permission)
+        await message.reply(goto_dm, parse_mode='HTML', reply_markup=check_permission)
     else:
         global chat_id
         chat_id = message.chat.id
