@@ -8,17 +8,16 @@ from loguru import logger
 from itertools import groupby
 from datetime import timedelta
 import time
-
+import base64
 
 bot = Bot(token=config.token)
 dp = Dispatcher(bot)
 
 logger.add(config.path_to_log, level='DEBUG')
 
-bot_ver = 2.0
 build_code = 'voZer by lunee and nekondrashov, reZov by nediorg'
 
-print(f'{splash}{bot_ver} {build_code}\n')
+print(f'{splash}{build_code}\n')
 
 logger.info('Initialization...')
 
@@ -183,7 +182,15 @@ async def privacy(call: types.CallbackQuery):
 @dp.message_handler(commands=['start', 'help'])
 async def get_started(message: types.Message):
     if await check_bl_wl(message):
-        await message.reply(hello_msg, reply_markup=start_menu)
+        args = message.get_args()
+        padding_len = len(args) % 4
+        args += '=' * padding_len
+        decoded = base64.urlsafe_b64decode(args).decode("utf-8")
+        parameters = decoded.split("_")
+        if not parameters[0]:
+            await message.reply(hello_msg, reply_markup=start_menu)
+        elif parameters[0] == "reset":
+            await reset_link(message, parameters)
 
 @dp.message_handler()
 async def get_text_messages(message: types.Message):
