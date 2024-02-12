@@ -24,33 +24,6 @@ async def cmd_cas(message: types.Message):
 async def rewards(message: types.Message): 
     await message.reply_photo(random.choice(photos))
 
-@dp.message_handler(commands="fun")
-async def cmd_fun(message: types.Message):
-	your_id = message.from_id
-	your_name = message.from_user.username
-	args = message.text.split(' ', maxsplit=2)
-	com = args[1]
-	if com == 'поцеловать':
-		act = 'поцеловал(а)'
-	if com == 'обосрать':
-		act = 'обосрал(а)'
-	if com == 'ударить':
-		act = 'ударил(а)'
-	if com == 'обоссать':
-		act = 'обоссал(а)'
-	if com == 'обнять':
-		act = 'обнял(а)'
-	if com == 'сьесть' or com == 'съесть':
-		act = 'съел(а)'
-	if com == 'забанить' or com == 'заблокировать' or com == 'бан':
-		act = 'заблокировал(а)'	
-	try:
-		friend_name = message.reply_to_message.from_user.username
-		friend_id = message.reply_to_message.from_user.id
-		await message.answer(f'[@{your_name}](tg://user?id={str(your_id)}) {act} [@{friend_name}](tg://user?id={str(friend_id)}).', parse_mode="Markdown")
-	except:
-		await message.answer(f'[@{your_name}](tg://user?id={str(your_id)}) всех {act}.', parse_mode="Markdown")
-
 @dp.message_handler(commands=["zablokirovat","blok"])
 async def send_handshake(message: types.Message):
     your_id = message.from_id
