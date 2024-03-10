@@ -3,7 +3,7 @@ import json
 
 # Configs
 LIBREY_INSTANCE = '' # URL of LibreY instance
-LIBREY_INSTANCE_API = urllib.parse.urljoin(LIBREX_INSTANCE, 'api.php?q=%')
+LIBREY_INSTANCE_API = urllib.parse.urljoin(LIBREY_INSTANCE, 'api.php?q=%')
 # Locales
 LOADING_TEXT = "<b>🔎 Поиск...</b>"
 ERROR_TEXT = "<b>⛔️ Не удалось выполнить поисковой запрос.</b>\n"
