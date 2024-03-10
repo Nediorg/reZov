@@ -216,7 +216,7 @@ async def get_text_messages(message: types.Message):
             with open(f'Bases/{message.chat.id}.txt', encoding='utf8') as file:
                 txt = file.read().split('·')
         try:
-            if len(txt) >= 2 and random.randint(config.min_random, config.max_random) == config.random_result or message.reply_to_message.from_user.id == my_info.id or message.chat.id == message.from_user.id:
+            if len(txt) >= 2 and random.randint(1, config.chance) == 1 or message.reply_to_message.from_user.id == my_info.id or message.chat.id == message.from_user.id:
                 generated_text = PhraseGenerator(samples=txt).generate_phrase().replace('@', '[at]')
                 if not os.path.exists(f'NotRepliedPhrases/{message.chat.id}.txt'):
                     open(f'NotRepliedPhrases/{message.chat.id}.txt', 'w').write('')

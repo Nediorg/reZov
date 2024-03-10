@@ -1,8 +1,6 @@
 token = '<your telegram bot token here>'
 
-min_random = 0
-max_random = 2
-random_result = 1
+chance = 4 # chance of activating /say (if 4 then the chance is equal to 1/4)
 
 # If 0 or other, whitelist will be enabled
 blacklist = 1
