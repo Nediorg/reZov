@@ -2,7 +2,7 @@ import urllib
 import json
 
 # Configs
-LIBREY_INSTANCE = '' # URL of LibreY instance
+LIBREY_INSTANCE = 'https://librex.antopie.org/'
 LIBREY_INSTANCE_API = urllib.parse.urljoin(LIBREY_INSTANCE, 'api.php?q=%')
 # Locales
 LOADING_TEXT = "<b>🔎 Поиск...</b>"
@@ -15,7 +15,7 @@ UNKNOWN_ERROR_REASON = "Неизвестная ошибка. Код ошибки
 async def search(message: types.Message):
     msg = await message.reply(LOADING_TEXT, parse_mode="HTML")
     try:
-        results_json = json.loads(urllib.request.urlopen(f'{LIBREY_INSTANCE_API}{urllib.parse.quote(message.text[3:])}').read())
+        results_json = json.loads(urllib.request.urlopen(f'{LIBREY_INSTANCE_API}{urllib.parse.quote(message.text.split(" ",1)[1])}').read())
         result_text = ''
         for result in results_json:
             if 'special_response' not in result:
