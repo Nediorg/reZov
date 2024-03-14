@@ -125,8 +125,6 @@ for extension in extensions:
             logger.warning(f'Extension "{extension}" does not end with .py, ignoring')
 
 logger.info('Loading lists...')
-bot_base_chats_list = open(f'{config.lists_dir}botbasechats.txt', encoding='utf8').read().split('\n')
-disabled_chats_list = open(f'{config.lists_dir}disabledchats.txt', encoding='utf8').read().split('\n')
 logs_disabled_chats_list = open(f'{config.lists_dir}logsdisabledchats.txt', encoding='utf8').read().split('\n')
 chats_list = [x for x in [i for i, _ in groupby(open(f'{config.lists_dir}chatslist', 'r').read().split('\n'))] if x]
 
@@ -257,7 +255,7 @@ async def get_text_messages(message: types.Message):
                 generated_text = PhraseGenerator(samples=txt).generate_phrase().replace('@', '[at]')
                 if not os.path.exists(f'NotRepliedPhrases/{message.chat.id}.txt'):
                     open(f'NotRepliedPhrases/{message.chat.id}.txt', 'w').write('')
-                if message.text not in open(f'NotRepliedPhrases/{message.chat.id}.txt', 'r').read().split('\n') and str(message.chat.id) not in open(f'Lists/disabledchats.txt', 'r').read().split('\n'):
+                if message.text not in open(f'NotRepliedPhrases/{message.chat.id}.txt', 'r').read().split('\n') and str(message.chat.id) not in disabled_chats_list:
                     await update_stats(message)
                     await message.reply(generated_text)
                     if str(message.chat.id) not in logs_disabled_chats_list and config.activate_logs == True:
