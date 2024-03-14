@@ -108,6 +108,7 @@ if not os.path.exists(config.path_to_num_of_all_gen_msgs):
     f.close()
 
 logger.info('Loading extensions...')
+command_handlers = {}
 extensions = os.listdir(config.extensions_dir)
 for extension in extensions:
     if os.path.isfile(os.path.join(config.extensions_dir, extension)):
@@ -189,8 +190,23 @@ async def get_started(message: types.Message):
         parameters = decoded.split("_")
         if not parameters[0]:
             await message.reply(hello_msg, reply_markup=start_menu)
-        elif parameters[0] == "reset":
-            await reset_link(message, parameters)
+        else:
+            command = parameters[0]
+            if command in command_handlers:
+                handler = command_handlers[command]
+                await handler(message, parameters)
+
+@dp.callback_query_handler(text='cancel_rights_check')
+async def bot_functionality(call: types.CallbackQuery):
+    await call.message.reply(okay_msg)
+    await call.message.delete()
+
+async def rights_check(message: types.Message, parameters):
+    link = await get_start_link(parameters, encode=True)
+    check_permission = types.InlineKeyboardMarkup()
+    check_permission.row(types.InlineKeyboardButton(text="Перейти", url=link))
+    check_permission.row(types.InlineKeyboardButton(text="Отмена", callback_data='cancel_rights_check'))
+    await message.reply(goto_dm, parse_mode='HTML', reply_markup=check_permission)
 
 @dp.message_handler()
 async def get_text_messages(message: types.Message):
