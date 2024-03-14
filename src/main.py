@@ -206,7 +206,28 @@ async def rights_check(message: types.Message, parameters):
     check_permission = types.InlineKeyboardMarkup()
     check_permission.row(types.InlineKeyboardButton(text="Перейти", url=link))
     check_permission.row(types.InlineKeyboardButton(text="Отмена", callback_data='cancel_rights_check'))
-    await message.reply(goto_dm, parse_mode='HTML', reply_markup=check_permission)
+    await message.reply(goto_dm_text, parse_mode='HTML', reply_markup=check_permission)
+
+@dp.message_handler(commands='logsmode')
+async def toggle_logs(message: types.Message):
+    if await check_change_info_permission(message):
+        if str(message.chat.id) in logs_disabled_chats_list:
+            logs_disabled_chats_list.remove(str(message.chat.id))
+            ldc_list = open(f'{config.lists_dir}logsdisabledchats.txt', 'w', encoding='utf8')
+            for ids in logs_disabled_chats_list:
+                ldc_list.write('%s\n' %ids)
+            await message.reply(logs_enabled, parse_mode='HTML')
+        else:
+            logs_disabled_chats_list.append(str(message.chat.id))
+            ldc_list = open(f'{config.lists_dir}logsdisabledchats.txt', 'w', encoding='utf8')
+            for ids in logs_disabled_chats_list:
+                ldc_list.write('%s\n' %ids)
+            await message.reply(logs_disabled, parse_mode='HTML')
+    else:
+        await message.reply(change_info_error, parse_mode='HTML')
+
+if __name__ == '__main__':
+    executor.start_polling(dp, skip_updates=True)
 
 @dp.message_handler()
 async def get_text_messages(message: types.Message):
@@ -245,7 +266,3 @@ async def get_text_messages(message: types.Message):
                         logger.info(log_str)
         except:
             pass
-       
-
-if __name__ == '__main__':
-    executor.start_polling(dp, skip_updates=True)
