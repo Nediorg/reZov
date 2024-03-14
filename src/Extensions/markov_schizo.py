@@ -105,15 +105,11 @@ command_handlers["get-chat-base"] = get_local_base
 
 @dp.message_handler(commands='saymuch')
 async def say_much(message: types.Message):
-    if str(message.chat.id) in bot_base_chats_list:
-        with open(path_to_base, encoding='utf8') as bfile:
-            txt = bfile.read().split('·')
-    else:
-        if not os.path.exists('Bases/' + str(message.chat.id) + '.txt'):
-            bf = open('Bases/' + str(message.chat.id) + '.txt', 'w', encoding='utf8')
-            bf.write('Hello World!·')
-        with open('Bases/' + str(message.chat.id) + '.txt', encoding='utf8') as bfile:
-            txt = bfile.read().split('·')
+    if not os.path.exists('Bases/' + str(message.chat.id) + '.txt'):
+        bf = open('Bases/' + str(message.chat.id) + '.txt', 'w', encoding='utf8')
+        bf.write('Hello World!·')
+    with open('Bases/' + str(message.chat.id) + '.txt', encoding='utf8') as bfile:
+        txt = bfile.read().split('·')
     generated_text = ''
     for mgt in range(say_much_cycles):
         generated_now_text = PhraseGenerator(samples=txt).generate_phrase()
@@ -127,15 +123,11 @@ async def say_much(message: types.Message):
 @dp.message_handler(commands=['justsay','say'])
 async def just_say(message: types.Message):
     try:
-        if str(message.chat.id) in bot_base_chats_list:
-            with open(path_to_base, encoding='utf8') as bfile:
-                txt = bfile.read().split('·')
-        else:
-            if not os.path.exists('Bases/' + str(message.chat.id) + '.txt'):
-                bf = open('Bases/' + str(message.chat.id) + '.txt', 'w', encoding='utf8')
-                bf.write('Hello World!·')
-            with open('Bases/' + str(message.chat.id) + '.txt', encoding='utf8') as bfile:
-                txt = bfile.read().split('·')
+        if not os.path.exists('Bases/' + str(message.chat.id) + '.txt'):
+            bf = open('Bases/' + str(message.chat.id) + '.txt', 'w', encoding='utf8')
+            bf.write('Hello World!·')
+        with open('Bases/' + str(message.chat.id) + '.txt', encoding='utf8') as bfile:
+            txt = bfile.read().split('·')
         generated_text = PhraseGenerator(samples=txt).generate_phrase()
         generated_text.replace('@', '[at]')
         await message.reply(generated_text)
