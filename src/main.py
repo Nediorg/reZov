@@ -224,9 +224,6 @@ async def toggle_logs(message: types.Message):
     else:
         await message.reply(change_info_error, parse_mode='HTML')
 
-if __name__ == '__main__':
-    executor.start_polling(dp, skip_updates=True)
-
 @dp.message_handler()
 async def get_text_messages(message: types.Message):
     if config.activate_logs == True:
@@ -236,26 +233,18 @@ async def get_text_messages(message: types.Message):
         if '·' in message.text:
                 log_str = f'{message.from_user.first_name} пытался заспамить базу.'
                 logger.info(log_str)
-        if str(message.chat.id) in bot_base_chats_list:
-            with open(config.path_to_base, 'a', encoding='utf8') as bfile:
-                bfile.write((str(message.text).replace('·', '*')) + '·')
-            with open(config.path_to_base, encoding='utf8') as file:
-                txt = file.read().split('·')
-        else:
-            if not os.path.exists(f'Bases/{message.chat.id}.txt'):
-                bf = open(f'Bases/{message.chat.id}.txt', 'w', encoding='utf8')
-                bf.write('Hello World!·')
-                bf.close()
-            with open(f'Bases/{message.chat.id}.txt', 'a', encoding='utf8') as bfile:
-                bfile.write((message.text.replace('·', '*')) + '·')
-            with open(f'Bases/{message.chat.id}.txt', encoding='utf8') as file:
-                txt = file.read().split('·')
+        if not os.path.exists(f'Bases/{message.chat.id}.txt'):
+            bf = open(f'Bases/{message.chat.id}.txt', 'w', encoding='utf8')
+            bf.write('Hello World!·')
+            bf.close()
+        with open(f'Bases/{message.chat.id}.txt', 'a', encoding='utf8') as bfile:
+            bfile.write((message.text.replace('·', '*')) + '·')
+        with open(f'Bases/{message.chat.id}.txt', encoding='utf8') as file:
+            txt = file.read().split('·')
         try:
             if len(txt) >= 2 and random.randint(1, config.chance) == 1 or message.reply_to_message.from_user.id == my_info.id or message.chat.id == message.from_user.id:
                 generated_text = PhraseGenerator(samples=txt).generate_phrase().replace('@', '[at]')
-                if not os.path.exists(f'NotRepliedPhrases/{message.chat.id}.txt'):
-                    open(f'NotRepliedPhrases/{message.chat.id}.txt', 'w').write('')
-                if message.text not in open(f'NotRepliedPhrases/{message.chat.id}.txt', 'r').read().split('\n') and str(message.chat.id) not in disabled_chats_list:
+                if str(message.chat.id) not in disabled_chats_list:
                     await update_stats(message)
                     await message.reply(generated_text)
                     if str(message.chat.id) not in logs_disabled_chats_list and config.activate_logs == True:
@@ -264,3 +253,6 @@ async def get_text_messages(message: types.Message):
                         logger.info(log_str)
         except:
             pass
+
+if __name__ == '__main__':
+    executor.start_polling(dp, skip_updates=True)
