@@ -17,6 +17,7 @@ BOT_IS_ACTIVE = 'Теперь, для этого чата, бот <b>актив�
 
 # Config
 say_much_cycles = 7
+disabled_chats_list = open(f'{config.lists_dir}markov_disabledchats.txt', encoding='utf8').read().split('\n')
 
 reset_menu = types.InlineKeyboardMarkup()
 reset_menu.row(types.InlineKeyboardButton(text=no, callback_data='cancel_delete_base'))
