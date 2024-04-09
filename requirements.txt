@@ -1,5 +1,5 @@
 mc.py
-aiogram
+aiogram==2.25.1
 beautifulsoup4
 requests
 lxml
