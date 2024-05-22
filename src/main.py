@@ -230,20 +230,18 @@ async def get_text_messages(message: types.Message):
         logger.info(f'{message.from_user.first_name} (ID {message.from_user.id}) (Chat ID {message.chat.id}): {message.text}')
     my_info = await bot.get_me()
     if await check_bl_wl(message):
-        if '·' in message.text:
-                log_str = f'{message.from_user.first_name} пытался заспамить базу.'
-                logger.info(log_str)
         if not os.path.exists(f'Bases/{message.chat.id}.txt'):
             bf = open(f'Bases/{message.chat.id}.txt', 'w', encoding='utf8')
             bf.write('Hello World!·')
             bf.close()
+        modified_text = filter_messages(message.text)
         with open(f'Bases/{message.chat.id}.txt', 'a', encoding='utf8') as bfile:
-            bfile.write((message.text.replace('·', '*')) + '·')
+            bfile.write((modified_text) + '·')
         with open(f'Bases/{message.chat.id}.txt', encoding='utf8') as file:
             txt = file.read().split('·')
         try:
             if len(txt) >= 2 and random.randint(1, config.chance) == 1 or message.reply_to_message.from_user.id == my_info.id or message.chat.id == message.from_user.id:
-                generated_text = PhraseGenerator(samples=txt).generate_phrase().replace('@', '[at]')
+                generated_text = filter_messages(PhraseGenerator(samples=txt).generate_phrase())
                 if str(message.chat.id) not in disabled_chats_list:
                     await update_stats(message)
                     await message.reply(generated_text)
