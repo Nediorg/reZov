@@ -114,6 +114,24 @@ async def get_local_base(message: types.Message, parameters: Optional[List[str]]
         await message.reply(change_info_error, parse_mode="HTML")
 command_handlers["get-chat-base"] = get_local_base
 
+@dp.message_handler(commands='getchatbase')
+async def get_local_base(message: types.Message):
+    if message.chat.id != message.from_user.id:
+        parameters = f"get-chat-base_{message.chat.id}"
+        await rights_check(message, parameters)
+    else:
+        try:
+            base_file = open('Bases/' + str(message.chat.id) + '.txt', 'r', encoding='utf8')
+            await message.reply_document(base_file, caption=CHAT_BASE_DESC)
+            base_file.close()
+        except:
+            bf = open('Bases/' + str(message.chat.id) + '.txt', 'w', encoding='utf8')
+            bf.write('Hello World!·')
+            bf.close()
+            base_file = open('Bases/' + str(message.chat.id) + '.txt', 'r', encoding='utf8')
+            await message.reply_document(base_file, caption=CHAT_BASE_DESC)
+            base_file.close()
+
 @dp.message_handler(commands='saymuch')
 async def say_much(message: types.Message):
     if not os.path.exists('Bases/' + str(message.chat.id) + '.txt'):
