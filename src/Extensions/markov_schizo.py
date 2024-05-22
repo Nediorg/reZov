@@ -26,6 +26,19 @@ reset_menu.row(types.InlineKeyboardButton(text=no, callback_data='cancel_delete_
 reset_menu.row(types.InlineKeyboardButton(text=no, callback_data='cancel_delete_base'))
 reset_menu.row(types.InlineKeyboardButton(text=yes, callback_data='delete_base'))
 
+def filter_messages(text):
+    link_pattern = re.compile(r'(https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/)?[a-zA-Z]{2,}(\.[a-zA-Z]{2,})(\.[a-zA-Z]{2,})?\/[a-zA-Z0-9]{2,}|((https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/)?[a-zA-Z]{2,}(\.[a-zA-Z]{2,})(\.[a-zA-Z]{2,})?)|(https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/)?[a-zA-Z0-9]{2,}\.[a-zA-Z0-9]{2,}\.[a-zA-Z0-9]{2,}(\.[a-zA-Z0-9]{2,})?')
+
+    def replace_dots(match):
+        return match.group(0).replace('.', '[dot]')
+
+    text = link_pattern.sub(replace_dots, text)
+
+    text = text.replace('@', '[at]')
+    text = text.replace('·', '*')
+
+    return text
+
 @dp.callback_query_handler(lambda c: c.data =='delete_base')
 async def del_base(call: types.CallbackQuery, **kwargs):
     await call.message.reply(RESET_TEXT)
@@ -114,7 +127,7 @@ async def say_much(message: types.Message):
     for mgt in range(say_much_cycles):
         generated_now_text = PhraseGenerator(samples=txt).generate_phrase()
         generated_text += ' ' + generated_now_text
-        generated_text.replace('@', '[at]')
+        generated_text = filter_messages(generated_text)
     await message.reply(generated_text)
     await update_stats(message)
     if str(message.chat.id) not in logs_disabled_chats_list:
@@ -129,7 +142,7 @@ async def just_say(message: types.Message):
         with open('Bases/' + str(message.chat.id) + '.txt', encoding='utf8') as bfile:
             txt = bfile.read().split('·')
         generated_text = PhraseGenerator(samples=txt).generate_phrase()
-        generated_text.replace('@', '[at]')
+        generated_text = filter_messages(generated_text)
         await message.reply(generated_text)
         await update_stats(message)
         if str(message.chat.id) not in logs_disabled_chats_list:
