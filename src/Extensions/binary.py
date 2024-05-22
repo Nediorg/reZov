@@ -21,6 +21,10 @@ async def convert_to_binary(message: types.Message):
 @dp.message_handler(commands='frombin')
 async def convert_from_binary(message: types.Message):
     if not len(message.text[message.entities[0].length:])==0:
-        await message.reply(await text_from_bits(message.text[message.entities[0].length:]))
+        text = await text_from_bits(message.text[message.entities[0].length:])
+        if 't.me/+42777' not in text:
+            await message.reply(text)
+        else:
+            await message.reply('IДI НАХУЙ\n\n- с уважением, админ')
     else:
         await message.reply(fhelp_txt, parse_mode='HTML')
