@@ -157,19 +157,19 @@ logger.success('Ready!')
 @dp.callback_query_handler(text='com')
 async def bot_functionality(call: types.CallbackQuery):
         await call.message.reply(comtext, reply_markup=cat)
-        
+
 @dp.callback_query_handler(text='fun_info')
 async def fun_inf(call: types.CallbackQuery):
     await call.message.reply(fun_info)
-        
+
 @dp.callback_query_handler(text='func_info')
 async def func_inf(call: types.CallbackQuery):
     await call.message.reply(func_info)
-        
+
 @dp.callback_query_handler(text='send_info')
 async def func_inf(call: types.CallbackQuery):
     await call.message.reply(send_hlp, parse_mode='HTML')
-        
+
 @dp.callback_query_handler(text='admin_info')
 async def admin_inf(call: types.CallbackQuery):
     await call.message.reply(admin_info)
@@ -234,14 +234,14 @@ async def get_text_messages(message: types.Message):
             bf = open(f'Bases/{message.chat.id}.txt', 'w', encoding='utf8')
             bf.write('Hello World!·')
             bf.close()
-        modified_text = filter_messages(message.text)
+        modified_text = filter_messages(message)
         with open(f'Bases/{message.chat.id}.txt', 'a', encoding='utf8') as bfile:
             bfile.write((modified_text) + '·')
         with open(f'Bases/{message.chat.id}.txt', encoding='utf8') as file:
             txt = file.read().split('·')
         try:
             if len(txt) >= 2 and random.randint(1, config.chance) == 1 or message.reply_to_message.from_user.id == my_info.id or message.chat.id == message.from_user.id:
-                generated_text = filter_messages(PhraseGenerator(samples=txt).generate_phrase())
+                generated_text = PhraseGenerator(samples=txt).generate_phrase()
                 if str(message.chat.id) not in disabled_chats_list:
                     await update_stats(message)
                     await message.reply(generated_text)
