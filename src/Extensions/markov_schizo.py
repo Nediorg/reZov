@@ -26,18 +26,34 @@ reset_menu.row(types.InlineKeyboardButton(text=no, callback_data='cancel_delete_
 reset_menu.row(types.InlineKeyboardButton(text=no, callback_data='cancel_delete_base'))
 reset_menu.row(types.InlineKeyboardButton(text=yes, callback_data='delete_base'))
 
-def filter_messages(text):
-    link_pattern = re.compile(r'(https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/)?[a-zA-Z]{2,}(\.[a-zA-Z]{2,})(\.[a-zA-Z]{2,})?\/[a-zA-Z0-9]{2,}|((https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/)?[a-zA-Z]{2,}(\.[a-zA-Z]{2,})(\.[a-zA-Z]{2,})?)|(https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/)?[a-zA-Z0-9]{2,}\.[a-zA-Z0-9]{2,}\.[a-zA-Z0-9]{2,}(\.[a-zA-Z0-9]{2,})?')
-
-    def replace_dots(match):
-        return match.group(0).replace('.', '[dot]')
-
-    text = link_pattern.sub(replace_dots, text)
-
-    text = text.replace('@', '[at]')
-    text = text.replace('·', '*')
-
-    return text
+def filter_messages(message):
+    text = message.text
+    types = []
+    offsets = []
+    for entity in message.entities:
+        offsets.append(entity.offset)
+        offsets.append(entity.length)
+        types.append(entity.type)
+    result = []
+    prev_end = 0
+    for i in range(0, len(offsets), 2):
+        start = offsets[i]
+        length = offsets[i+1]
+        result.append(text[prev_end:start])
+        result.append(text[start:start+length])
+        prev_end = start + length
+    result.append(text[prev_end:])
+    for i in range(len(result)):
+        if i % 2 == 1:
+            current_type = types[i // 2]
+            if current_type == "url":
+                result[i] = result[i].replace('.', '[dot]')
+            elif current_type == "mention":
+                result[i] = result[i].replace('@', '[at]')
+            elif current_type == "bot_command":
+                result[i] = result[i].replace('/', '\\')
+    print(result)
+    return ''.join(result).replace('·', '*')
 
 @dp.callback_query_handler(lambda c: c.data =='delete_base')
 async def del_base(call: types.CallbackQuery, **kwargs):
@@ -79,24 +95,6 @@ async def reset_link(message: types.Message, parameters: Optional[List[str]] = N
             await message.reply(change_info_error, parse_mode='HTML')
 command_handlers["reset"] = reset_link
 
-@dp.message_handler(commands='getchatbase')
-async def get_local_base(message: types.Message):
-    if message.chat.id != message.from_user.id:
-        parameters = f"get-chat-base_{message.chat.id}"
-        await rights_check(message, parameters)
-    else:
-        try:
-            base_file = open('Bases/' + str(message.chat.id) + '.txt', 'r', encoding='utf8')
-            await message.reply_document(base_file, caption=CHAT_BASE_DESC)
-            base_file.close()
-        except:
-            bf = open('Bases/' + str(message.chat.id) + '.txt', 'w', encoding='utf8')
-            bf.write('Hello World!·')
-            bf.close()
-            base_file = open('Bases/' + str(message.chat.id) + '.txt', 'r', encoding='utf8')
-            await message.reply_document(base_file, caption=CHAT_BASE_DESC)
-            base_file.close()
-
 async def get_local_base(message: types.Message, parameters: Optional[List[str]] = None):
     chat_id = parameters[1]
     member = await bot.get_chat_member(int(parameters[1]), message.from_user.id)
@@ -127,7 +125,6 @@ async def say_much(message: types.Message):
     for mgt in range(say_much_cycles):
         generated_now_text = PhraseGenerator(samples=txt).generate_phrase()
         generated_text += ' ' + generated_now_text
-        generated_text = filter_messages(generated_text)
     await message.reply(generated_text)
     await update_stats(message)
     if str(message.chat.id) not in logs_disabled_chats_list:
@@ -142,7 +139,6 @@ async def just_say(message: types.Message):
         with open('Bases/' + str(message.chat.id) + '.txt', encoding='utf8') as bfile:
             txt = bfile.read().split('·')
         generated_text = PhraseGenerator(samples=txt).generate_phrase()
-        generated_text = filter_messages(generated_text)
         await message.reply(generated_text)
         await update_stats(message)
         if str(message.chat.id) not in logs_disabled_chats_list:
