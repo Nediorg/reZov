@@ -1,11 +1,23 @@
-<h1 align="center">
-  <br><img src="assets/logo.jpg" alt="reZov (not that z!)"></br>
-</h1>
-
-<p align="center">reZov is a fork of voZer - another Telegram bot written in Python3 that can help you write random text from a bot base (botbase.txt or [chatid].txt) that is updated with chat messages and that connects in the correct base mode between chats where the bot is located.</p>
-
+<h6 align="center">
+<img src="assets/logo.jpg" alt="reZov (not that z!)"></img><br>
+ <i>(not that Z!)</i>
+</h6>
+<p align="center"><b>reZov</b> is an open-source bot for Telegram based on aiogram. It is a fork of another bot - <a href="https://codeberg.org/voZer-project/voZer/">voZer.</a><br>
+  The main goal at the moment is to improve the codebase and fix the errors.</p>
 <p align="center">At the moment, the bot is only available in Russian language.</p>
 
+## Main features
+- Text generation based on a Markov chain [(markov_schizo.py)](src/Extensions/markov_schizo.py)
+- "On this day" (Wikipedia API) [(today.py)](src/Extensions/today.py)
+- Web search (LibreY API) [(search.py)](src/Extensions/search.py)
+- Send messages to all users [(admin.py)](src/Extensions/admin.py)
+- Weather (wttr.in API) [(wttr.py)](src/Extensions/wttr.py)
+- */send*ing messages to the administrator [(resend.py)](src/Extensions/resend.py)
+#### Also some fun features:
+- Randomizer [(random.py)](src/Extensions/random.py)
+- bessrom turbo pabji smooth [(bessrom.py)](src/Extensions/bessrom.py)
+- blok chat or someone!!!1!! [(fun.py)](src/Extensions/fun.py)
+- Send */casino* emoji or */dice* emoji [(fun.py)](src/Extensions/fun.py)
 ## Demo
 
 <img src="assets/demo.png" alt="User: hi
@@ -21,13 +33,20 @@ Python version: 3.10.6 (main, May 29 2023, 11:10:38) [GCC 11.3.0]">
 
 ## Installation
 
-1. Clone repository via `git clone https://github.com/nediorg/reZov.git`
-2. Install packages<br>
-on Linux: `pip3 install -r requirements.txt`<br>
-on Windows: `pip install -r requirements.txt`<br>
-4. Write your config in [config.py](src/config.py)
-5. Start bot via `python3 main.py`
-6. You're awesome!
+1. Clone repository:
+```
+git clone https://github.com/nediorg/reZov.git
+```
+2. Install packages:
+```
+pip install -r requirements.txt
+```
+3. Write your config in [config.py](src/config.py)
+4. Start bot:
+```
+python3 main.py
+```
+5. You're awesome!
 
 ## Contributing
 
