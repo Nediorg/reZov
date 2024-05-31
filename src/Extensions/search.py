@@ -5,13 +5,12 @@ import json
 LIBREY_INSTANCE = 'https://librex.antopie.org/'
 LIBREY_INSTANCE_API = urllib.parse.urljoin(LIBREY_INSTANCE, 'api.php?q=%')
 # Locales
-LOADING_TEXT = "<b>🔎 Поиск...</b>"
 ERROR_TEXT = "<b>⛔️ Не удалось выполнить поисковой запрос.</b>\n"
 ERROR_URLError_TEXT = f"Невозможно подключиться к <a href='{LIBREY_INSTANCE}'>серверу.</a>"
 ERROR_JSONDecodeError_TEXT = "Ошибка при обработке JSON-ответа от API."
 UNKNOWN_ERROR_REASON = "Неизвестная ошибка. Код ошибки: "
 
-@dp.message_handler(commands='s')
+@dp.message(Command(commands='s'))
 async def search(message: types.Message):
     msg = await message.reply(LOADING_TEXT, parse_mode="HTML")
     try:

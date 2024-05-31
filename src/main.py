@@ -1,6 +1,12 @@
 import os, random, config, mc, requests
 from local import *
-from aiogram import Bot, Dispatcher, executor, types
+
+from aiogram import Bot, Dispatcher, types, F
+from aiogram.filters import Command
+from aiogram.utils.deep_linking import decode_payload
+
+import asyncio
+
 from platform import system, release
 from sys import version
 from mc import PhraseGenerator
@@ -11,7 +17,7 @@ import time
 import base64
 
 bot = Bot(token=config.token)
-dp = Dispatcher(bot)
+dp = Dispatcher()
 
 logger.add(config.path_to_log, level='DEBUG')
 
@@ -99,9 +105,6 @@ if not os.path.exists(config.extensions_dir):
 if not os.path.exists(config.stats_dir):
     os.mkdir(config.stats_dir)
 
-if not os.path.exists('NotRepliedPhrases'):
-    os.mkdir('NotRepliedPhrases')
-
 if not os.path.exists(config.path_to_num_of_all_gen_msgs):
     f = open(config.path_to_num_of_all_gen_msgs, 'w', encoding='utf8')
     f.write('0')
@@ -120,7 +123,7 @@ for extension in extensions:
                 except Exception as e:
                     logger.exception(f'Error initializing extension "{extension}", ignoring')
             else:
-                logger.warning(f'Extension "{extension}" is blank, ignoring')
+                logger.warning(f'Extension "{extension}" is blank')
         else:
             logger.warning(f'Extension "{extension}" does not end with .py, ignoring')
 
@@ -139,74 +142,78 @@ else:
 
 
 logger.info('One moment...')
-start_menu = types.InlineKeyboardMarkup()
-start_menu.row(types.InlineKeyboardButton(text='Исходный код reZov', url='https://github.com/Nediorg/reZov'))
-start_menu.row(types.InlineKeyboardButton(text=contact_with_admin_text, callback_data='send_info'))
-start_menu.row(types.InlineKeyboardButton(text=prviacy_policy_title, callback_data='privacy_policy'))
-start_menu.row(types.InlineKeyboardButton(text=func_button, callback_data='com'))
 
-cat = types.InlineKeyboardMarkup()
-cat.row(types.InlineKeyboardButton(text=func_title, callback_data='func_info'))
-cat.row(types.InlineKeyboardButton(text=admin_title, callback_data='admin_info'))
-cat.row(types.InlineKeyboardButton(text=fun_title, callback_data='fun_info'))
+start_menu = types.InlineKeyboardMarkup(inline_keyboard=[[
+    types.InlineKeyboardButton(text='Исходный код reZov', url='https://github.com/Nediorg/reZov')],
+    [types.InlineKeyboardButton(text=contact_with_admin_text, callback_data='send_info'),
+    types.InlineKeyboardButton(text=prviacy_policy_title, callback_data='privacy_policy')],
+    [types.InlineKeyboardButton(text=func_button, callback_data='com')
+    ]]
+)
 
-contact_with_admin_menu = types.InlineKeyboardMarkup()
-contact_with_admin_menu.add(types.InlineKeyboardButton(text=contact_with_admin_text, url='t.me/' + config.admin_username))
-logger.success('Ready!')
+cat = types.InlineKeyboardMarkup(inline_keyboard=[[
+    types.InlineKeyboardButton(text=func_title, callback_data='func_info'),
+    types.InlineKeyboardButton(text=admin_title, callback_data='admin_info'),
+    types.InlineKeyboardButton(text=fun_title, callback_data='fun_info')
+    ]]
+)
 
-@dp.callback_query_handler(text='com')
+contact_with_admin_menu = types.InlineKeyboardMarkup(inline_keyboard=[[
+    types.InlineKeyboardButton(text=contact_with_admin_text, url='t.me/' + config.admin_username)
+    ]]
+)
+
+@dp.callback_query(F.data=='com')
 async def bot_functionality(call: types.CallbackQuery):
         await call.message.reply(comtext, reply_markup=cat)
-
-@dp.callback_query_handler(text='fun_info')
+        
+@dp.callback_query(F.data=='fun_info')
 async def fun_inf(call: types.CallbackQuery):
     await call.message.reply(fun_info)
-
-@dp.callback_query_handler(text='func_info')
+        
+@dp.callback_query(F.data=='func_info')
 async def func_inf(call: types.CallbackQuery):
     await call.message.reply(func_info)
-
-@dp.callback_query_handler(text='send_info')
+        
+@dp.callback_query(F.data=='send_info')
 async def func_inf(call: types.CallbackQuery):
     await call.message.reply(send_hlp, parse_mode='HTML')
-
-@dp.callback_query_handler(text='admin_info')
+        
+@dp.callback_query(F.data == 'admin_info')
 async def admin_inf(call: types.CallbackQuery):
     await call.message.reply(admin_info)
 
-@dp.callback_query_handler(text='privacy_policy')
+@dp.callback_query(F.data=='privacy_policy')
 async def privacy(call: types.CallbackQuery):
     await call.message.reply(privacy_policy_text)
 
-@dp.message_handler(commands=['start', 'help'])
+@dp.message(Command(commands=['start', 'help']))
 async def get_started(message: types.Message):
-    if await check_bl_wl(message):
-        args = message.get_args()
-        padding_len = len(args) % 4
-        args += '=' * padding_len
-        decoded = base64.urlsafe_b64decode(args).decode("utf-8")
-        parameters = decoded.split("_")
-        if not parameters[0]:
-            await message.reply(hello_msg, reply_markup=start_menu)
-        else:
-            command = parameters[0]
-            if command in command_handlers:
-                handler = command_handlers[command]
-                await handler(message, parameters)
+    args = message.text.split(' ', 1)
+    if not args:
+        await message.reply(hello_msg, reply_markup=start_menu)
+    else:
+        command = decode_payload(args[1]).split('_')
+        print(command)
+        if command[0] in command_handlers:
+            handler = command_handlers[command[0]]
+            await handler(message, command[1])
 
-@dp.callback_query_handler(text='cancel_rights_check')
+@dp.callback_query(F.data=='cancel_rights_check')
 async def bot_functionality(call: types.CallbackQuery):
     await call.message.reply(okay_msg)
     await call.message.delete()
 
 async def rights_check(message: types.Message, parameters):
-    link = await get_start_link(parameters, encode=True)
-    check_permission = types.InlineKeyboardMarkup()
-    check_permission.row(types.InlineKeyboardButton(text="Перейти", url=link))
-    check_permission.row(types.InlineKeyboardButton(text="Отмена", callback_data='cancel_rights_check'))
+    link = await create_start_link(bot, parameters, encode=True)
+    check_permission = types.InlineKeyboardMarkup(inline_keyboard=[[
+    types.InlineKeyboardButton(text="Перейти", url=link)],[
+    types.InlineKeyboardButton(text="Отмена", callback_data='cancel_rights_check')
+        ]]
+    )
     await message.reply(goto_dm_text, parse_mode='HTML', reply_markup=check_permission)
 
-@dp.message_handler(commands='logsmode')
+@dp.message(Command(commands='logsmode'))
 async def toggle_logs(message: types.Message):
     if await check_change_info_permission(message):
         if str(message.chat.id) in logs_disabled_chats_list:
@@ -224,33 +231,28 @@ async def toggle_logs(message: types.Message):
     else:
         await message.reply(change_info_error, parse_mode='HTML')
 
-@dp.message_handler()
+@dp.message()
 async def get_text_messages(message: types.Message):
-    if config.activate_logs == True:
-        logger.info(f'{message.from_user.first_name} (ID {message.from_user.id}) (Chat ID {message.chat.id}): {message.text}')
     my_info = await bot.get_me()
-    if await check_bl_wl(message):
-        if not os.path.exists(f'Bases/{message.chat.id}.txt'):
-            bf = open(f'Bases/{message.chat.id}.txt', 'w', encoding='utf8')
-            bf.write('Hello World!·')
-            bf.close()
-        modified_text = filter_messages(message)
-        with open(f'Bases/{message.chat.id}.txt', 'a', encoding='utf8') as bfile:
-            bfile.write((modified_text) + '·')
-        with open(f'Bases/{message.chat.id}.txt', encoding='utf8') as file:
-            txt = file.read().split('·')
-        try:
-            if len(txt) >= 2 and random.randint(1, config.chance) == 1 or message.reply_to_message.from_user.id == my_info.id or message.chat.id == message.from_user.id:
-                generated_text = PhraseGenerator(samples=txt).generate_phrase()
-                if str(message.chat.id) not in disabled_chats_list:
-                    await update_stats(message)
-                    await message.reply(generated_text)
-                    if str(message.chat.id) not in logs_disabled_chats_list and config.activate_logs == True:
-                        await bot.send_message(config.logs_channel_id, f'{user_msg_title}{message.text} \n---\n\n{bot_answer_title}{generated_text}\n---')
-                        log_str = f'{message.from_user.first_name} (ID {message.from_user.id}) (Chat ID {message.chat.id}): {message.text} | Bot answer: {generated_text}'
-                        logger.info(log_str)
-        except:
-            pass
+    with open(f'Bases/{message.chat.id}.txt', 'a', encoding='utf8') as bfile:
+        bfile.write((message.text.replace('·', '*')) + '·')
+    try:
+        if len(txt) >= 2 and random.randint(1, config.chance) == 1 or message.reply_to_message.from_user.id == my_info.id or message.chat.id == message.from_user.id:
+            if str(message.chat.id) not in disabled_chats_list:
+                schizo_text = generate_markov_schizo(message)
+                await message.reply(schizo_text)
+                await update_stats(message)
+                if str(message.chat.id) not in logs_disabled_chats_list and config.activate_logs == True:
+                    await bot.send_message(config.logs_channel_id, f'{user_msg_title}{message.text} \n---\n\n{bot_answer_title}{generated_text}\n---')
+                    log_str = f'{message.from_user.first_name} (ID {message.from_user.id}) (Chat ID {message.chat.id}): {message.text} | Bot answer: {generated_text}'
+                    logger.info(log_str)
+    except:
+        pass
 
-if __name__ == '__main__':
-    executor.start_polling(dp, skip_updates=True)
+logger.success('Ready!')
+
+async def main():
+    await dp.start_polling(bot)
+
+if __name__ == "__main__":
+    asyncio.run(main()) 

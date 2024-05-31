@@ -8,7 +8,7 @@ import os
 if not os.path.exists(f'{config.extensions_dir}/man/'):
     os.mkdir(f'{config.extensions_dir}/man/')
 
-@dp.message_handler(commands='man')
+@dp.message(Command(commands='man'))
 async def get_manual(message: types.Message):
     try:
         if not os.path.exists(f'{config.extensions_dir}/man/{message.text[5:]}') or '..' in message.text:
@@ -17,7 +17,7 @@ async def get_manual(message: types.Message):
             await message.reply(open(f'{config.extensions_dir}/man/{message.text[5:]}').read())
     except IsADirectoryError:
         await message.reply(mhelp_txt, parse_mode='HTML')    
-@dp.message_handler(commands='listman')
+@dp.message(Command(commands='listman'))
 async def get_manuals_list(message: types.Message):
     try:
         man_list = ''

@@ -2,7 +2,7 @@ from random import randint
 
 rhelp_txt = '<b>Выбирает число случайным образом.</b>\nИспользование: /random [min] [max]\nПример: /random 1 10'
 
-@dp.message_handler(commands='random')
+@dp.message(Command(commands='random'))
 async def generate_random_number(message: types.Message):
     if not len(message.text[message.entities[0].length:])==0:
         args = message.text.split(' ')

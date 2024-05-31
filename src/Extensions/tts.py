@@ -1,24 +1,24 @@
 from gtts import gTTS
-from langdetect import detect
+import langid
+from aiogram.types import FSInputFile
+import tempfile
 
-help_txt = '<b>Данная команда озвучивает ваш текст.</b>\nИспользование: /tts [текст]'
-randomint = random.randint(1000, 9999)
-temp_dir = os.path.join(os.getcwd(), config.extensions_dir, 'temp/')
-if not os.path.exists(temp_dir):
-    os.mkdir(temp_dir)
-temp_file =  os.path.join(temp_dir, str(randomint) + '.mp3')
+HELP_TEXT = '<b>Данная команда озвучивает ваш текст.</b>\nИспользование: /tts [текст]'
+ERROR_TEXT = '⛔️<b>Не удалось озвучить текст.</b>\n'
+LangDetectException_TEXT = 'В тексте нет поддерживаемых символов.'
 
-@dp.message_handler(commands='tts')
+@dp.message(Command(commands='tts'))
 async def tts_handler(message: types.Message):
-    if not len(message.text[message.entities[0].length:])==0:
-        randomint = random.randint(1000, 9999)
-        input_tts = {message.text[message.entities[0].length:]}
-        lang = detect(str(input_tts))
-        tts = gTTS(str(input_tts), lang=lang)
-        tts.save(temp_file)
-        with open(temp_file, 'rb') as f:
-            voice_message = f.read()
-        await bot.send_voice(message.chat.id, voice_message)
-        os.remove(temp_file)
+    if len(message.text.split(maxsplit=1)) > 1:
+        input_tts = message.text.split(maxsplit=1)[1]
+        lang = langid.classify(input_tts)[0]
+        try:
+            tts = gTTS(input_tts, lang=lang)
+        except ValueError:
+            tts = gTTS(input_tts, lang='en')
+        with tempfile.NamedTemporaryFile(delete=False) as tmp:
+            tts.save(tmp.name)
+            voice_file = FSInputFile(tmp.name)
+        await bot.send_voice(message.chat.id, voice_file)
     else:
-        await message.reply(help_txt, parse_mode='HTML') 
+        await message.reply(HELP_TEXT, parse_mode='HTML')

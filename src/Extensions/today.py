@@ -6,27 +6,25 @@ WIKI_INFO_TEXT = f'\n<i>Данные взяты из <b><a href="{LANG_CODE}.wik
 LOADING_TEXT = "⏳ <b>Подождите...</b>"
 AT_THIS_DAY_TEXT = "в этот день"
 
-THEMES_API_LIST = ["births", "events", "holidays"] # for API
-THEMES_TEXT_LIST = ["Дни рождения", "События", "Праздники"] # for message
+THEMES_API_LIST = ["births", "events", "holidays"]
+THEMES_TEXT_LIST = ["Дни рождения", "События", "Праздники"]
 
 import requests
 import datetime
 import random
 from typing import Optional, List
 
-@dp.message_handler(commands='today')
+@dp.message(Command(commands='today'))
 async def today(message: types.Message):
     THEME_API = random.choice(THEMES_API_LIST)
     await on_this_day(message, THEME_API)
 
 def today_facts(THEME_API, DATA, MONTH, DAY):
     THEME_NAME = THEMES_TEXT_LIST[THEMES_API_LIST.index(THEME_API)]
-
     try:
         EVENTS = DATA[THEME_API]
     except KeyError:
         return 1
-
     FACT = f"🗓 <b>{THEME_NAME} {AT_THIS_DAY_TEXT}</b> ({MONTH}/{DAY}):\n\n"
     for i in range(min(5, len(EVENTS))):
         try:

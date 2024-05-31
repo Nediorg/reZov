@@ -2,9 +2,13 @@
 <img src="assets/logo.jpg" alt="reZov (not that z!)"></img><br>
  <i>(not that Z!)</i>
 </h6>
+
 <p align="center"><b>reZov</b> is an open-source bot for Telegram based on aiogram. It is a fork of another bot - <a href="https://codeberg.org/voZer-project/voZer/">voZer.</a><br>
   The main goal at the moment is to improve the codebase and fix the errors.</p>
 <p align="center">At the moment, the bot is only available in Russian language.</p>
+
+> [!WARNING]
+> The branch is not completed yet! Some functions are broken!
 
 ## Main features
 - Text generation based on a Markov chain [(markov_schizo.py)](src/Extensions/markov_schizo.py)
@@ -12,7 +16,7 @@
 - Web search (LibreY API) [(search.py)](src/Extensions/search.py)
 - Send messages to all users [(admin.py)](src/Extensions/admin.py)
 - Weather (wttr.in API) [(wttr.py)](src/Extensions/wttr.py)
-- */send*ing messages to the administrator [(resend.py)](src/Extensions/resend.py)
+- */send*ing messages to the administrator [(admin.py)](src/Extensions/admin.py)
 #### Also some fun features:
 - Randomizer [(random.py)](src/Extensions/random.py)
 - bessrom turbo pabji smooth [(bessrom.py)](src/Extensions/bessrom.py)
