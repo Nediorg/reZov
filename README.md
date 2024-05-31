@@ -7,8 +7,18 @@
   The main goal at the moment is to improve the codebase and fix the errors.</p>
 <p align="center">At the moment, the bot is only available in Russian language.</p>
 
+# Experimental aiogram3 branch 
+
 > [!WARNING]
 > The branch is not completed yet! Some functions are broken!
+
+# Known Issues
+
+| Filename                          | Issue               | Fixed? |
+|-----------------------------------|---------------------|--------|
+| [main.py](src/main.py)            | Broken rights check (affected [markov_schizo.py](src/Extensions/markov_schizo.py)) |   ❌   |
+|                                   | Broken /start, /help |   ❌   |
+| [markov_schizo.py](src/Extensions/markov_schizo.py) | Broken /getchatbase, /reset (caused by [main.py](src/main.py))   |   ❌   |
 
 ## Main features
 - Text generation based on a Markov chain [(markov_schizo.py)](src/Extensions/markov_schizo.py)
