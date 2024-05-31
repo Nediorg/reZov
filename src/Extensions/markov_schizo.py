@@ -52,7 +52,6 @@ def filter_messages(message):
                 result[i] = result[i].replace('@', '[at]')
             elif current_type == "bot_command":
                 result[i] = result[i].replace('/', '\\')
-    print(result)
     return ''.join(result).replace('·', '*')
 
 @dp.callback_query_handler(lambda c: c.data =='delete_base')
