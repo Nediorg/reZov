@@ -224,33 +224,24 @@ async def toggle_logs(message: types.Message):
     else:
         await message.reply(change_info_error, parse_mode='HTML')
 
-@dp.message_handler()
+@dp.message()
 async def get_text_messages(message: types.Message):
-    if config.activate_logs == True:
-        logger.info(f'{message.from_user.first_name} (ID {message.from_user.id}) (Chat ID {message.chat.id}): {message.text}')
     my_info = await bot.get_me()
-    if await check_bl_wl(message):
-        if not os.path.exists(f'Bases/{message.chat.id}.txt'):
-            bf = open(f'Bases/{message.chat.id}.txt', 'w', encoding='utf8')
-            bf.write('Hello World!·')
-            bf.close()
-        modified_text = filter_messages(message)
-        with open(f'Bases/{message.chat.id}.txt', 'a', encoding='utf8') as bfile:
-            bfile.write((modified_text) + '·')
-        with open(f'Bases/{message.chat.id}.txt', encoding='utf8') as file:
-            txt = file.read().split('·')
-        try:
-            if len(txt) >= 2 and random.randint(1, config.chance) == 1 or message.reply_to_message.from_user.id == my_info.id or message.chat.id == message.from_user.id:
-                generated_text = PhraseGenerator(samples=txt).generate_phrase()
-                if str(message.chat.id) not in disabled_chats_list:
-                    await update_stats(message)
-                    await message.reply(generated_text)
-                    if str(message.chat.id) not in logs_disabled_chats_list and config.activate_logs == True:
-                        await bot.send_message(config.logs_channel_id, f'{user_msg_title}{message.text} \n---\n\n{bot_answer_title}{generated_text}\n---')
-                        log_str = f'{message.from_user.first_name} (ID {message.from_user.id}) (Chat ID {message.chat.id}): {message.text} | Bot answer: {generated_text}'
-                        logger.info(log_str)
-        except:
-            pass
+    modified_text = filter_messages(message)
+    with open(f'Bases/{message.chat.id}.txt', 'a', encoding='utf8') as bfile:
+        bfile.write(modified_text + '·')
+    try:
+        if len(txt) >= 2 and random.randint(1, config.chance) == 1 or message.reply_to_message.from_user.id == my_info.id or message.chat.id == message.from_user.id:
+            if str(message.chat.id) not in disabled_chats_list:
+                schizo_text = generate_markov_schizo(message)
+                await message.reply(schizo_text)
+                await update_stats(message)
+                if str(message.chat.id) not in logs_disabled_chats_list and config.activate_logs == True:
+                    await bot.send_message(config.logs_channel_id, f'{user_msg_title}{message.text} \n---\n\n{bot_answer_title}{generated_text}\n---')
+                    log_str = f'{message.from_user.first_name} (ID {message.from_user.id}) (Chat ID {message.chat.id}): {message.text} | Bot answer: {generated_text}'
+                    logger.info(log_str)
+    except:
+        pass
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)
