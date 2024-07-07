@@ -36,6 +36,7 @@ func_info = '''
 /wfull 
 /s
 /tts
+/sticker
 '''
 contact_with_admin_text = '/send - связаться с админ-ами'
 user_msg_title = 'Сообщение юзера:\n'
