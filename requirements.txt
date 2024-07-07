@@ -8,6 +8,6 @@ selenium
 python-mpv
 py-cpuinfo
 psutil
-# tts
 langdetect
 gtts
+python-magic
